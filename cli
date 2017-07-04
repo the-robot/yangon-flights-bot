@@ -1,0 +1,94 @@
+#!/usr/bin/env python
+
+import sys
+from datetime import datetime
+
+from model.flights import FlightWrapper
+
+
+class Cli(FlightWrapper):
+    """cli program to test model"""
+
+    def __init__(self):
+        # initialize variables
+        self.current_time = datetime.now()
+        self.data = {}  # to store arrival/depart flights
+
+        # retrieve latest flights information
+        self.updateArrival()
+        self.updateDeparture()
+
+    def searchArrival(self, query):
+        """search for the flight information by flight number or airline name"""
+        flights = []
+
+        if self.initUpdate() is True:
+            updateArrival()
+
+        for flight in self.data['arrival']:
+            if query in flight.getArray():
+                flights.append(flight)
+
+        # if flights not found return None
+        if not flights:
+            return None
+        return flights
+
+    def searchDeparture(self, query):
+        flights = []
+
+        """search for the flight information by flight number or airline name"""
+        if self.initUpdate() is True:
+            updateDeparture()
+
+        for flight in self.data['departure']:
+            if query in flight.getArray():
+                flights.append(flight)
+
+        # if flights not found return None
+        if not flights:
+            return None
+        return flights
+
+
+    def updateArrival(self):
+        """retrieve latest arrival flights information"""
+        self.data['arrival'] = self.getArrival()
+
+    def updateDeparture(self):
+        """retrieve latest departure flights information"""
+        self.data['departure'] = self.getDeparture()
+
+    def compareTime(self, current_time, new_time):
+        """return time difference (min, sec) in tuple"""
+        difference = new_time - current_time
+        return divmod(difference.days * 86400 + difference.seconds, 60)
+
+    def initUpdate(self):
+        """determine whether to update flights information or not
+        finding difference between current time and last updated time
+        must be 5mins difference to retrieve new information"""
+        new_time = datetime.now()
+        if self.compareTime(self.current_time, new_time)[0] > 5:
+            self.current_time = new_time
+            return True
+        return False
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        exit("./cli [arrival/depart] query")
+
+    if sys.argv[1] == 'arrival':
+        main = Cli()
+        flight = main.searchArrival(sys.argv[2])
+    elif sys.argv[1] == 'depart':
+        main = Cli()
+        flight = main.searchDeparture(sys.argv[2])
+    else:
+        exit("./cli [arrival/depart] query")
+
+    if flight is not None:
+        print(flight[0].getCity())
+    else:
+        print("Given flight not found")
