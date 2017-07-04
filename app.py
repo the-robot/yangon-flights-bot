@@ -7,6 +7,7 @@ from flask import Flask, request
 
 from controller.controller import Flights
 from view import templates
+from misc import time
 
 
 # create flights instant
@@ -53,59 +54,68 @@ def webhook():
 
                     else:
                         # check if there is time in message (FORMAT: query at time)
-                        message_text = message_text.rsplit(" at ", 1)
+                        message_text = message_text.rsplit(" around ", 1)
 
                         # time not included search by flight no. or airline 
                         if len(message_text) == 1:
-                            searchByFlight(sender_id, message_text[0])
+                            arrivals = flights.search('arrival', message_text[0])
+                            departures = flights.search('departure', message_text[0])
+                            handler(sender_id, message_text[0], arrivals, departures)
                         # if time included, len should be 2
                         else:
-                            pass
+                            message = message_text[0]
+                            # change time to 24 hour format
+                            time_in_12hr = time.twentyfourHour(message_text[1])
 
-                if messaging_event.get("delivery"):  # delivery confirmation
-                    pass
-
-                if messaging_event.get("optin"):  # optin confirmation
-                    pass
-
-                if messaging_event.get("postback"):  # user clicked/tapped "postback" button in earlier message
-                    pass
-
+                            if time_in_12hr is not None:
+                                arrivals = flights.searchByTime('arrival', message_text[0], time_in_12hr)
+                                departures = flights.searchByTime('departure', message_text[0], time_in_12hr)
+                                handler(sender_id, message_text[0], arrivals, departures)
+                            else:
+                                # send error message, for time format error
+                                message = "Sorry, your time is not valid, it should be 12hr\
+                                           format without minutes. (i.e. 7pm)"
+                                params, headers, data = templates.message(sender_id, message)
+                                send(params, headers, data)
     return "ok", 200
 
 
-def searchByFlight(sender_id, query):
-    # search flight information
+def handler(sender_id, query, arrivals, departures):
+    """Message Handler. reply the text based on the searched result contidion
+    @PARAM sender_id  -> client user id
+    @PARAM query      -> what user is looking for
+    @PARAM arrivals   -> searched result of flights based on query
+    @PARAM departures -> searched result of flights based on query
+    """
 
-    arrivals = flights.search('arrival', query)
-    departures = flights.search('departure', query)
-    totalFlights = arrivals + departures
+    # searched flight information
+    searched_flights = arrivals + departures
 
     # if flight not found
-    if len(totalFlights) == 0:
+    if len(searched_flights) == 0:
         message = "Sorry, I cannot any flights with {}".format(query.title())
         params, headers, data = templates.message(sender_id, message)
 
     # if flight is in arrivals
-    elif len(totalFlights) == 1 and departures == []:
+    elif len(searched_flights) == 1 and departures == []:
         message = "Flight {} from {} will arrive at {}. It's {}.".format(
-                   totalFlights[0].getFlightNo(), totalFlights[0].getCity(),
-                   totalFlights[0].getScheduled(), totalFlights[0].getStatus().lower())
+                   searched_flights[0].getFlightNo(), searched_flights[0].getCity(),
+                   searched_flights[0].getScheduled(), searched_flights[0].getStatus().lower())
         params, headers, data = templates.message(sender_id, message)
 
     # if flight is in departures
-    elif len(totalFlights) == 1 and arrivals == []:
+    elif len(searched_flights) == 1 and arrivals == []:
         message = "Flight {} to {} will take off at {}.".format(
-                   totalFlights[0].getFlightNo(), totalFlights[0].getCity(),
-                   totalFlights[0].getScheduled())
+                   searched_flights[0].getFlightNo(), searched_flights[0].getCity(),
+                   searched_flights[0].getScheduled())
         params, headers, data = templates.message(sender_id, message)
 
     # if there are more than 1 matched flights and it is less than 11
     # ask user to choose by flight number
     # (Facebook quick replies maximum limit is 11)
-    elif len(totalFlights) > 1 and len(totalFlights) <= 11:
+    elif len(searched_flights) > 1 and len(searched_flights) <= 11:
         options = []
-        for flight in totalFlights:
+        for flight in searched_flights:
             options.append({
                 "content_type": "text",
                 "title": flight.getFlightNo(),
@@ -115,7 +125,7 @@ def searchByFlight(sender_id, query):
 
     # TODO
     else:
-        message = "Sorry, there are many flights with {}. Please give me the flight number.".format(
+        message = "Sorry, there are many flights with {}. Please give me the flight number or tell me the time. I.e. 'Air KBZ around 6pm'".format(
                    query.title())
         params, headers, data = templates.message(sender_id, message)
     

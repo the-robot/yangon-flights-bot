@@ -57,7 +57,7 @@ class Flights(FlightWrapper):
 
         for flight in self.data[data_type]:
             if query.upper() in flight.getArray() and time.isnear(
-                time.twentyfourHour(time_lookup),
+                time_lookup,
                 time.twentyfourHourWithMins(flight.getScheduled())):
                 flights.append(flight)
 
