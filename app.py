@@ -91,6 +91,9 @@ def searchByFlight(sender_id, query):
                    totalFlights[0].getScheduled())
         params, headers, data = templates.message(sender_id, message)
 
+    # if there are more than 1 matched flights and it is less than 11
+    # ask user to choose by flight number
+    # (Facebook quick replies maximum limit is 11)
     elif len(totalFlights) > 1 and len(totalFlights) <= 11:
         options = []
         for flight in totalFlights:
@@ -101,9 +104,7 @@ def searchByFlight(sender_id, query):
                 })
         params, headers, data = templates.options(sender_id, "Please select the flight number", options)
 
-    # if there are more than 1 matched flights and it is less than 11
-    # ask user to choose by flight number
-    # (Facebook quick replies maximum limit is 11)
+    # TODO
     else:
         message = "Sorry, there are many flights with {}. Please give me the flight number.".format(
                    query.title())
