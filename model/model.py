@@ -1,5 +1,6 @@
 class Flight:
     """Flight information model"""
+
     def __init__(self, flightno, airline, city, scheduled, expected, status):
         self.flightno = flightno
         self.airline = airline
@@ -46,6 +47,7 @@ class Flight:
 
     def getArray(self):
         """Return an array of flight info"""
+
         return [self.getFlightNo(),
                 self.getAirline(),
                 self.getCity(),

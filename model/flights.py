@@ -1,8 +1,9 @@
 import urllib2
 from bs4 import BeautifulSoup
 
-from . import useragents
 from .model import Flight
+from misc import useragents
+from misc import time
 
 
 class FlightWrapper:
@@ -66,35 +67,8 @@ class FlightWrapper:
                 flight = Flight(columns[0].find('a').text.upper(),
                                 columns[1].find('a').text.upper(),
                                 " ".join(word for word in city),
-                                self.meridiemFormat(columns[3].text),
-                                self.meridiemFormat(columns[4].text),
+                                time.twelveHour(columns[3].text),
+                                time.twelveHour(columns[4].text),
                                 columns[5].find('div').text)
                 flights.append(flight)
         return flights
-
-    def meridiemFormat(self, time):
-        """ Format 24hr to 12hr time """
-        time = time.split(":")
-
-        if not any(time):
-            return u''
-
-        elif time[0] == "00":
-            time[0] = "12"
-            meridiem = "am"
-
-        elif int(time[0]) < 12:
-            meridiem = "am"
-
-        elif int(time[0]) == 12:
-            meridiem = "pm"
-
-        elif int(time[0]) > 12:
-            hour = int(time[0]) - 12
-            if hour >= 10:
-                time[0] = str(hour)
-            else:
-                time[0] = "0" + str(hour)
-            meridiem = "pm"
-
-        return time[0] + ":" + time[1] + meridiem

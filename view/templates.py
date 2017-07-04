@@ -7,7 +7,8 @@ import json
 
 
 def message(recipient_id, message_text):
-    """ Normal Message Template """
+    """Normal Message Template"""
+
     params = {
         "access_token": os.environ["PAGE_ACCESS_TOKEN"]
     }
@@ -27,7 +28,8 @@ def message(recipient_id, message_text):
 
 
 def options(recipient_id, message_text, options):
-    """ Message with Quick-Reply Options """
+    """Message with Quick-Reply Options"""
+
     params = {
         "access_token": os.environ["PAGE_ACCESS_TOKEN"]
     }

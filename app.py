@@ -19,6 +19,7 @@ app = Flask(__name__)
 def verify():
     # when the endpoint is registered as a webhook, it must echo back
     # the 'hub.challenge' value it receives in the query arguments
+
     if request.args.get("hub.mode") == "subscribe" and request.args.get("hub.challenge"):
         if not request.args.get("hub.verify_token") == os.environ["VERIFY_TOKEN"]:
             return "Verification token mismatch", 403
@@ -30,6 +31,7 @@ def verify():
 @app.route('/', methods=['POST'])
 def webhook():
     # endpoint for processing incoming messaging events
+
     data = request.get_json()
     log(data)  # you may not want to log every incoming message in production, but it's good for testing
 
@@ -48,11 +50,17 @@ def webhook():
                         message = "Sorry, I can only speak in english for now."
                         params, headers, data = templates.message(sender_id, message)
                         send(params, headers, data)
-                    
+
                     else:
-                        # check if there is time in message
-                        # if not search by flight no. or airline
-                        searchByFlight(sender_id, message_text)
+                        # check if there is time in message (FORMAT: query at time)
+                        message_text = message_text.rsplit(" at ", 1)
+
+                        # time not included search by flight no. or airline 
+                        if len(message_text) == 1:
+                            searchByFlight(sender_id, message_text[0])
+                        # if time included, len should be 2
+                        else:
+                            pass
 
                 if messaging_event.get("delivery"):  # delivery confirmation
                     pass
@@ -68,8 +76,9 @@ def webhook():
 
 def searchByFlight(sender_id, query):
     # search flight information
-    arrivals = flights.searchArrival(query.upper())
-    departures = flights.searchDeparture(query.upper())
+
+    arrivals = flights.search('arrival', query)
+    departures = flights.search('departure', query)
     totalFlights = arrivals + departures
 
     # if flight not found
@@ -114,7 +123,8 @@ def searchByFlight(sender_id, query):
 
 
 def send(params, headers, data):
-    """ send data back to client """
+    """send data back to client"""
+
     r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
     if r.status_code != 200:
         log(r.status_code)
@@ -127,7 +137,8 @@ def log(message):  # simple wrapper for logging to stdout on heroku
 
 
 def isEnglish(word):
-    """ check if given input is in English """
+    """check if given input is in English"""
+
     try:
         word.decode('ascii')
     except UnicodeEncodeError:

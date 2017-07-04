@@ -2,6 +2,7 @@ import random
 
 def get():
     """return ramdomly chosen useragent"""
+
     return random.choice(useragents)
 
 

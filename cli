@@ -4,9 +4,10 @@ import sys
 from datetime import datetime
 
 from model.flights import FlightWrapper
+from misc import time
 
 
-class Cli(FlightWrapper):
+class Flights(FlightWrapper):
     """cli program to test model"""
 
     def __init__(self):
@@ -16,40 +17,57 @@ class Cli(FlightWrapper):
 
         # retrieve latest flights information
         self.updateArrival()
+        print("[+] getting arrival data DONE")
+
         self.updateDeparture()
+        print("[+] getting departure data DONE")
 
-    def searchArrival(self, query):
-        """search for the flight information by flight number or airline name"""
+    def search(self, data_type, query):
+        """search for the flight information by flight number or airline with time
+        @PARAM data_type   -> either 'arrival' or 'departure'
+        @PARAM query       -> to look for in flights instances
+        """
         flights = []
 
         if self.initUpdate() is True:
-            updateArrival()
+            if data_type == "arrival":
+                self.updateArrival()
+            else:
+                self.updateDeparture()
 
-        for flight in self.data['arrival']:
-            if query in flight.getArray():
+        for flight in self.data[data_type]:
+            if query.upper() in flight.getArray():
                 flights.append(flight)
 
-        # if flights not found return None
+        # if flights not found
         if not flights:
             return []
         return flights
 
-    def searchDeparture(self, query):
+    def searchByTime(self, data_type, query, time_lookup):
+        """search for the flight information by flight number or airline with time
+        @PARAM data_type   -> either 'arrival' or 'departure'
+        @PARAM query       -> to look for in flights instances
+        @PARAM time_lookup -> filter results by time
+        """
         flights = []
 
-        """search for the flight information by flight number or airline name"""
         if self.initUpdate() is True:
-            updateDeparture()
+            if data_type == "arrival":
+                self.updateArrival()
+            else:
+                self.updateDeparture()
 
-        for flight in self.data['departure']:
-            if query in flight.getArray():
+        for flight in self.data[data_type]:
+            if query.upper() in flight.getArray() and time.isnear(
+                time.twentyfourHour(time_lookup),
+                time.twentyfourHourWithMins(flight.getScheduled())):
                 flights.append(flight)
 
-        # if flights not found return None
+        # if flights not found
         if not flights:
             return []
         return flights
-
 
     def updateArrival(self):
         """retrieve latest arrival flights information"""
@@ -80,15 +98,16 @@ if __name__ == "__main__":
         exit("./cli [arrival/depart] query")
 
     if sys.argv[1] == 'arrival':
-        main = Cli()
-        flights = main.searchArrival(sys.argv[2])
+        main = Flights()
+        #flights = main.search('arrival', sys.argv[2])
+        flights = main.searchByTime("arrival", "Myanmar Airways International", "7pm")
     elif sys.argv[1] == 'depart':
-        main = Cli()
-        flights = main.searchDeparture(sys.argv[2])
+        main = Flights()
+        flights = main.search('departure', sys.argv[2])
     else:
         exit("./cli [arrival/depart] query")
 
     if flights != []:
-        print("Flight {} is scheduled at {}".format(flights[0].getFlightNo(), flights[0].getScheduled()))
+        print("Flight {} is scheduled at {}.".format(flights[0].getFlightNo(), flights[0].getScheduled()))
     else:
         print("Given flight not found")
