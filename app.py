@@ -114,7 +114,7 @@ def replyHandler(sender_id, query, arrivals, departures):
 
     # if flight not found
     if len(searched_flights) == 0:
-        message = u"Sorry, I cannot any flights with {}.".format(query.title())
+        message = u"Sorry, I cannot any flight with {}.".format(query.title())
         params, headers, data = templates.message(sender_id, message)
         send(params, headers, data)
 
@@ -159,7 +159,7 @@ def replyHandler(sender_id, query, arrivals, departures):
 
 
     else:
-        message = u"Sorry, there are many flights with {}. Please give me the flight number or the time. I.e. 'Air KBZ around 6pm' {}".format(
+        message = u"There are many flights with {}. Please give me the flight number or the time. I.e. 'Air KBZ around 6pm' {}".format(
                    query.title(), emoji.grinning)
         params, headers, data = templates.message(sender_id, message)
         send(params, headers, data)
