@@ -1,2 +1,3 @@
-# yangonflights
-Facebook messenger bot that shows flights of Yangon International Airport
+## ဘယ်အချိန်ဆိုက်မှာလဲ (Messenger Bot)  
+
+> Python Runtime **2.7**
