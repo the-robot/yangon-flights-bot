@@ -10,9 +10,7 @@ from view import templates
 from misc import time
 
 
-# create flights instant
 flights = Flights()
-
 app = Flask(__name__)
 
 
@@ -41,7 +39,6 @@ def webhook():
             for messaging_event in entry["messaging"]:
 
                 if messaging_event.get("message"):  # someone sent us a message
-
                     sender_id = messaging_event["sender"]["id"]        # the facebook ID of the person sending you the message
                     recipient_id = messaging_event["recipient"]["id"]  # the recipient's ID, which should be your page's facebook ID
                     message_text = messaging_event["message"]["text"]  # the message's text
@@ -53,7 +50,8 @@ def webhook():
                         send(params, headers, data)
 
                     else:
-                        # check if there is time in message (FORMAT: query at time)
+                        # check if there is time in message
+                        # FORMAT: <query> around <time in 12hr> (i.e. 7pm)
                         message_text = message_text.rsplit(" around ", 1)
 
                         # time not included search by flight no. or airline 
@@ -61,15 +59,16 @@ def webhook():
                             arrivals = flights.search('arrival', message_text[0])
                             departures = flights.search('departure', message_text[0])
                             handler(sender_id, message_text[0], arrivals, departures)
-                        # if time included, len should be 2
+
+                        # if time included, len is 2
                         else:
                             message = message_text[0]
                             # change time to 24 hour format
-                            time_in_12hr = time.twentyfourHour(message_text[1])
+                            time_in_24hr = time.twentyfourHour(message_text[1])
 
-                            if time_in_12hr is not None:
-                                arrivals = flights.searchByTime('arrival', message_text[0], time_in_12hr)
-                                departures = flights.searchByTime('departure', message_text[0], time_in_12hr)
+                            if time_in_24hr is not None:
+                                arrivals = flights.searchByTime('arrival', message_text[0], time_in_24hr)
+                                departures = flights.searchByTime('departure', message_text[0], time_in_24hr)
                                 handler(sender_id, message_text[0], arrivals, departures)
                             else:
                                 # send error message, for time format error
@@ -98,16 +97,17 @@ def handler(sender_id, query, arrivals, departures):
 
     # if flight is in arrivals
     elif len(searched_flights) == 1 and departures == []:
-        message = "Flight {} from {} will arrive at {}. It's {}.".format(
-                   searched_flights[0].getFlightNo(), searched_flights[0].getCity(),
-                   searched_flights[0].getScheduled(), searched_flights[0].getStatus().lower())
+        message = "Flight {} operated by {} from {} will arrive at {}. It's {}.".format(
+                   searched_flights[0].getFlightNo(), searched_flights[0].getAirline().title(),
+                   searched_flights[0].getCity(), searched_flights[0].getScheduled(),
+                   searched_flights[0].getStatus().lower())
         params, headers, data = templates.message(sender_id, message)
 
     # if flight is in departures
     elif len(searched_flights) == 1 and arrivals == []:
-        message = "Flight {} to {} will take off at {}.".format(
-                   searched_flights[0].getFlightNo(), searched_flights[0].getCity(),
-                   searched_flights[0].getScheduled())
+        message = "Flight {} operated by {} to {} will take off at {}.".format(
+                   searched_flights[0].getFlightNo(), searched_flights[0].getAirline().title(),
+                   searched_flights[0].getCity(), searched_flights[0].getScheduled())
         params, headers, data = templates.message(sender_id, message)
 
     # if there are more than 1 matched flights and it is less than 11
@@ -123,7 +123,6 @@ def handler(sender_id, query, arrivals, departures):
                 })
         params, headers, data = templates.options(sender_id, "Please select the flight number", options)
 
-    # TODO
     else:
         message = "Sorry, there are many flights with {}. Please give me the flight number or tell me the time. I.e. 'Air KBZ around 6pm'".format(
                    query.title())

@@ -6,6 +6,11 @@ from datetime import datetime
 from model.flights import FlightWrapper
 from misc import time
 
+"""README
+- this script is to test the functionality without running with Flask
+- used to test for controller
+"""
+
 
 class Flights(FlightWrapper):
     """cli program to test model"""
@@ -99,11 +104,12 @@ if __name__ == "__main__":
 
     if sys.argv[1] == 'arrival':
         main = Flights()
-        #flights = main.search('arrival', sys.argv[2])
-        flights = main.searchByTime("arrival", "Myanmar Airways International", "7pm")
+        flights = main.search('arrival', sys.argv[2])
+        #flights = main.searchByTime("arrival", "Myanmar Airways International", "7pm")
     elif sys.argv[1] == 'depart':
         main = Flights()
         flights = main.search('departure', sys.argv[2])
+        #flights = main.searchByTime("departure", "Myanmar Airways International", "7pm")
     else:
         exit("./cli [arrival/depart] query")
 
