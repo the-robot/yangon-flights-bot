@@ -1,9 +1,11 @@
 ## ဘယ်အချိန်ဆိုက်မှာလဲ (Messenger Bot)  
 
-> Python Runtime **2.7**
+### Description
+- Facebook messenger bot to reply flight information of Yangon Internationl Airport
 
+> Python Runtime **2.7**  
 
-### Startup  
+### Setup
 1. git clone https://github.com/Hadesy2k/yangonflights.git
 2. virtualenv --python=/usr/bin/python yangonflights
 3. source bin/activate
