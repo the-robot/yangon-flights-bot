@@ -4,6 +4,7 @@
 - Facebook messenger bot to reply flight information of Yangon Internationl Airport
 
 ### Development
+- Backend server is written in Flask micro-framework
 > Python Runtime **2.7**  
 
 **Setup**  
