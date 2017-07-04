@@ -31,7 +31,7 @@ class Cli(FlightWrapper):
 
         # if flights not found return None
         if not flights:
-            return None
+            return []
         return flights
 
     def searchDeparture(self, query):
@@ -47,7 +47,7 @@ class Cli(FlightWrapper):
 
         # if flights not found return None
         if not flights:
-            return None
+            return []
         return flights
 
 
@@ -81,14 +81,14 @@ if __name__ == "__main__":
 
     if sys.argv[1] == 'arrival':
         main = Cli()
-        flight = main.searchArrival(sys.argv[2])
+        flights = main.searchArrival(sys.argv[2])
     elif sys.argv[1] == 'depart':
         main = Cli()
-        flight = main.searchDeparture(sys.argv[2])
+        flights = main.searchDeparture(sys.argv[2])
     else:
         exit("./cli [arrival/depart] query")
 
-    if flight is not None:
-        print(flight[0].getCity())
+    if flights != []:
+        print("Flight {} is scheduled at {}".format(flights[0].getFlightNo(), flights[0].getScheduled()))
     else:
         print("Given flight not found")
