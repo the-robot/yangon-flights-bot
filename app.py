@@ -40,12 +40,12 @@ def webhook():
         for entry in data["entry"]:
             for messaging_event in entry["messaging"]:
 
-                if messaging_event.get("message"):  # someone sent us a message
-                    sender_id = messaging_event["sender"]["id"]        # the facebook ID of the person sending you the message
-                    recipient_id = messaging_event["recipient"]["id"]  # the recipient's ID, which should be your page's facebook ID
+                if messaging_event.get("message"):
+                    sender_id = messaging_event["sender"]["id"]
+                    recipient_id = messaging_event["recipient"]["id"]
                     
                     try:
-                        message_text = messaging_event["message"]["text"]  # the message's text
+                        message_text = messaging_event["message"]["text"]
                     except KeyError:
                         emojiPerserving(sender_id)
 
@@ -95,8 +95,7 @@ def incomingHandler(sender_id, message_text):
                 emojiPerserving(sender_id)
 
                 # send error message, for time format error
-                message = u"Sorry, your time is not valid, it should be 12hr\
-                           format without minutes. (i.e. 7pm)"
+                message = u"Sorry, your time is not valid, it should be 12hr format without minutes. (i.e. 7pm)"
                 params, headers, data = templates.message(sender_id, message)
                 send(params, headers, data)
 
@@ -114,7 +113,7 @@ def replyHandler(sender_id, query, arrivals, departures):
 
     # if flight not found
     if len(searched_flights) == 0:
-        message = u"Sorry, I cannot any flight with {}.".format(query.title())
+        message = u"Sorry, I cannot find any flight with {}.".format(query.title())
         params, headers, data = templates.message(sender_id, message)
         send(params, headers, data)
 
