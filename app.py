@@ -34,7 +34,7 @@ def webhook():
     # endpoint for processing incoming messaging events
 
     data = request.get_json()
-    log(data)  # you may not want to log every incoming message in production, but it's good for testing
+    log(data)  # log incoming message
 
     if data["object"] == "page":
         for entry in data["entry"]:
@@ -95,7 +95,8 @@ def incomingHandler(sender_id, message_text):
                 emojiPerserving(sender_id)
 
                 # send error message, for time format error
-                message = u"Sorry, your time is not valid, it should be 12hr format without minutes. (i.e. 7pm)"
+                message = u"Sorry, your time is not valid, \
+                it should be 12hr format without minutes. (i.e. 7pm)"
                 params, headers, data = templates.message(sender_id, message)
                 send(params, headers, data)
 
@@ -120,7 +121,6 @@ def replyHandler(sender_id, query, arrivals, departures):
         # Send Sorry Emoji
         emojiSorry(sender_id)
 
-
     # if flight is in arrivals
     elif len(searched_flights) == 1 and departures == []:
         message = u"Flight {} operated by {} from {} will arrive at {}. It's {}.".format(
@@ -130,7 +130,6 @@ def replyHandler(sender_id, query, arrivals, departures):
         params, headers, data = templates.message(sender_id, message)
         send(params, headers, data)
 
-
     # if flight is in departures
     elif len(searched_flights) == 1 and arrivals == []:
         message = u"Flight {} operated by {} to {} will take off at {}.".format(
@@ -138,7 +137,6 @@ def replyHandler(sender_id, query, arrivals, departures):
                    searched_flights[0].getCity(), searched_flights[0].getScheduled())
         params, headers, data = templates.message(sender_id, message)
         send(params, headers, data)
-
 
     # if there are more than 1 matched flights and it is less than 11
     # ask user to choose by flight number
@@ -156,7 +154,6 @@ def replyHandler(sender_id, query, arrivals, departures):
             options)
         send(params, headers, data)
 
-
     else:
         message = u"There are many flights with {}. Please give me the flight number or the time. I.e. 'Air KBZ around 6pm' {}".format(
                    query.title(), emoji.grinning)
@@ -167,7 +164,8 @@ def replyHandler(sender_id, query, arrivals, departures):
 def send(params, headers, data):
     """send data back to client"""
 
-    r = requests.post("https://graph.facebook.com/v2.6/me/messages", params=params, headers=headers, data=data)
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages", 
+            params=params, headers=headers, data=data)
     if r.status_code != 200:
         log(r.status_code)
         log(r.text)
@@ -180,7 +178,8 @@ def log(message):  # simple wrapper for logging to stdout on heroku
 
 # Fancy Methods
 def emojiSorry(sender_id):
-    message = u"{} {} {} {}".format(emoji.sorry, emoji.sorry, emoji.sorry, emoji.sorry)
+    message = u"{} {} {} {}".format(
+        emoji.sorry, emoji.sorry, emoji.sorry, emoji.sorry)
     params, headers, data = templates.message(sender_id, message)
     send(params, headers, data)
 
