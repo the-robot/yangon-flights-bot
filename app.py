@@ -43,7 +43,7 @@ def webhook():
                 if messaging_event.get("message"):
                     sender_id = messaging_event["sender"]["id"]
                     recipient_id = messaging_event["recipient"]["id"]
-                    
+
                     try:
                         message_text = messaging_event["message"]["text"]
                     except KeyError:
