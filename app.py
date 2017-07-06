@@ -95,8 +95,7 @@ def incomingHandler(sender_id, message_text):
                 emojiPerserving(sender_id)
 
                 # send error message, for time format error
-                message = u"Sorry, your time is not valid, \
-                it should be 12hr format without minutes. (i.e. 7pm)"
+                message = u"Sorry, your time is not valid, it should be 12hr format without minutes. (i.e. 7pm)"
                 params, headers, data = templates.message(sender_id, message)
                 send(params, headers, data)
 
