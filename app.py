@@ -75,7 +75,7 @@ def incomingHandler(sender_id, message_text):
 
         # time not included search by flight no. or airline 
         if len(message_text) == 1:
-            if message_text[0] == "airlines":
+            if message_text[0].upper() == "AIRLINES":
                 airlines = u"This is the list of airlines"
                 for each in flights.getAirlines():
                     airlines += u"\n\u2022 " + unicode(each)
