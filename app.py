@@ -1,6 +1,5 @@
 import os
 import sys
-import json
 
 import requests
 from flask import Flask, request
@@ -50,8 +49,8 @@ def webhook():
                         emojiPerserving(sender_id)
 
                         message = u"I can only read sentences."
-                        params, headers, data = templates.message(sender_id, message)
-                        send(params, headers, data)
+                        data = templates.message(sender_id, message)
+                        send(data)
                     else:
                         incomingHandler(sender_id, message_text)
     return "ok", 200
@@ -66,8 +65,8 @@ def incomingHandler(sender_id, message_text):
         emojiPoker(sender_id)
 
         message = u"I can only speak in english."
-        params, headers, data = templates.message(sender_id, message)
-        send(params, headers, data)
+        data = templates.message(sender_id, message)
+        send(data)
 
     else:
         # check if there is time in message
@@ -76,9 +75,17 @@ def incomingHandler(sender_id, message_text):
 
         # time not included search by flight no. or airline 
         if len(message_text) == 1:
-            arrivals = flights.search('arrival', message_text[0])
-            departures = flights.search('departure', message_text[0])
-            replyHandler(sender_id, message_text[0], arrivals, departures)
+            if message_text[0] == "airlines":
+                airlines = u"This is the list of airlines"
+                for each in flights.getAirlines():
+                    airlines += u"\n\u2022 " + unicode(each)
+                data = templates.message(sender_id, airlines)
+                send(data)
+
+            else:
+                arrivals = flights.search('arrival', message_text[0])
+                departures = flights.search('departure', message_text[0])
+                replyHandler(sender_id, message_text[0], arrivals, departures)
 
         # if time included, len is 2
         else:
@@ -96,8 +103,8 @@ def incomingHandler(sender_id, message_text):
 
                 # send error message, for time format error
                 message = u"Sorry, your time is not valid, it should be 12hr format without minutes. (i.e. 7pm)"
-                params, headers, data = templates.message(sender_id, message)
-                send(params, headers, data)
+                data = templates.message(sender_id, message)
+                send(data)
 
 
 def replyHandler(sender_id, query, arrivals, departures):
@@ -114,8 +121,8 @@ def replyHandler(sender_id, query, arrivals, departures):
     # if flight not found
     if len(searched_flights) == 0:
         message = u"Sorry, I cannot find any flight with {}.".format(query.title())
-        params, headers, data = templates.message(sender_id, message)
-        send(params, headers, data)
+        data = templates.message(sender_id, message)
+        send(data)
 
         # Send Sorry Emoji
         emojiSorry(sender_id)
@@ -126,16 +133,16 @@ def replyHandler(sender_id, query, arrivals, departures):
                    searched_flights[0].getFlightNo(), searched_flights[0].getAirline().title(),
                    searched_flights[0].getCity(), searched_flights[0].getScheduled(),
                    searched_flights[0].getStatus().lower())
-        params, headers, data = templates.message(sender_id, message)
-        send(params, headers, data)
+        data = templates.message(sender_id, message)
+        send(data)
 
     # if flight is in departures
     elif len(searched_flights) == 1 and arrivals == []:
         message = u"Flight {} operated by {} to {} will take off at {}.".format(
                    searched_flights[0].getFlightNo(), searched_flights[0].getAirline().title(),
                    searched_flights[0].getCity(), searched_flights[0].getScheduled())
-        params, headers, data = templates.message(sender_id, message)
-        send(params, headers, data)
+        data = templates.message(sender_id, message)
+        send(data)
 
     # if there are more than 1 matched flights and it is less than 11
     # ask user to choose by flight number
@@ -148,20 +155,26 @@ def replyHandler(sender_id, query, arrivals, departures):
                 "title": flight.getFlightNo(),
                 "payload": flight.getFlightNo()
                 })
-        params, headers, data = templates.options(sender_id,
+        data = templates.options(sender_id,
             u"Please select the flight number {}".format(emoji.grinning),
             options)
-        send(params, headers, data)
+        send(data)
 
     else:
         message = u"There are many flights with {}. Please give me the flight number or the time. I.e. 'Air KBZ around 6pm' {}".format(
                    query.title(), emoji.grinning)
-        params, headers, data = templates.message(sender_id, message)
-        send(params, headers, data)
+        data = templates.message(sender_id, message)
+        send(data)
 
 
-def send(params, headers, data):
+def send(data):
     """send data back to client"""
+    params = {
+        "access_token": os.environ["PAGE_ACCESS_TOKEN"]
+    }
+    headers = {
+        "Content-Type": "application/json"
+    }
 
     r = requests.post("https://graph.facebook.com/v2.6/me/messages", 
             params=params, headers=headers, data=data)
@@ -179,18 +192,18 @@ def log(message):  # simple wrapper for logging to stdout on heroku
 def emojiSorry(sender_id):
     message = u"{} {} {} {}".format(
         emoji.sorry, emoji.sorry, emoji.sorry, emoji.sorry)
-    params, headers, data = templates.message(sender_id, message)
-    send(params, headers, data)
+    data = templates.message(sender_id, message)
+    send(data)
 
 def emojiPerserving(sender_id):
     message = u"{}".format(emoji.persevering)
-    params, headers, data = templates.message(sender_id, message)
-    send(params, headers, data)
+    pdata = templates.message(sender_id, message)
+    send(data)
 
 def emojiPoker(sender_id):
     message = u"{}".format(emoji.poker)
-    params, headers, data = templates.message(sender_id, message)
-    send(params, headers, data)
+    data = templates.message(sender_id, message)
+    send(data)
 
 
 if __name__ == '__main__':

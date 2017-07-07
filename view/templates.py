@@ -2,19 +2,12 @@
 Facebook API Reply Templates
 """
 
-import os
 import json
 
 
 def message(recipient_id, message_text):
     """Normal Message Template"""
 
-    params = {
-        "access_token": os.environ["PAGE_ACCESS_TOKEN"]
-    }
-    headers = {
-        "Content-Type": "application/json"
-    }
     data = json.dumps({
         "recipient": {
             "id": recipient_id
@@ -24,18 +17,12 @@ def message(recipient_id, message_text):
         }
     })
 
-    return params, headers, data
+    return data
 
 
 def options(recipient_id, message_text, options):
     """Message with Quick-Reply Options"""
 
-    params = {
-        "access_token": os.environ["PAGE_ACCESS_TOKEN"]
-    }
-    headers = {
-        "Content-Type": "application/json"
-    }
     data = json.dumps({
         "recipient": {
             "id": recipient_id
@@ -46,4 +33,25 @@ def options(recipient_id, message_text, options):
         }
     })
 
-    return params, headers, data
+    return data
+
+
+def list(recipient_id, airlines):
+    """List the name of the airlines"""
+    
+    data = json.dumps({
+        "recipient": {
+            "id": recipient_id
+        },
+        "message": {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "list",
+                    "elements": airlines
+                }
+            }
+        }
+    })
+
+    return data

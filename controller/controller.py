@@ -76,6 +76,22 @@ class Flights(FlightWrapper):
 
         self.data['departure'] = self.getDeparture()
 
+    def getAirlines(self):
+        """filter and get name of the airlines"""
+        airlines = set()
+
+        # update flights if it is updated more than 5mins ago
+        if self.initUpdate() is True:
+            self.updateArrival()
+            self.updateDeparture()
+
+        for flight in self.data['arrival'] + self.data['departure']:
+            if flight.getAirline() != '':
+                airlines.add(flight.getAirline().title())
+        # sort the names from A-Z
+        sorted(airlines)
+        return airlines
+
     def compareTime(self, current_time, new_time):
         """return time difference (min, sec) in tuple"""
 
