@@ -197,7 +197,7 @@ def emojiSorry(sender_id):
 
 def emojiPerserving(sender_id):
     message = u"{}".format(emoji.persevering)
-    pdata = templates.message(sender_id, message)
+    data = templates.message(sender_id, message)
     send(data)
 
 def emojiPoker(sender_id):
