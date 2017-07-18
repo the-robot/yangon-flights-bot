@@ -5,7 +5,7 @@ def twentyfourHour(time):
     """12 hour without mins (i.e. 5pm) to 24 hour format"""
 
     # if found, FORMAT [(hour, meridiem)]
-    time = re.findall(r'(\d+)(am|pm)$', time)
+    time = re.findall(r'(\d+)(am|pm)$', time.lower())
 
     if not time:  # [] not found
         return None
@@ -18,7 +18,7 @@ def twentyfourHourWithMins(time):
     """12 hour with mins (i.e. 5:45pm) to 24 hour format"""
 
     # if found, FORMAT [(hour, mins, meridiem)]
-    time = re.findall(r'(\d+):(\d+)(am|pm)$', time)
+    time = re.findall(r'(\d+):(\d+)(am|pm)$', time.lower())
 
     if not time:  # [] not found
         return None
@@ -55,7 +55,7 @@ def twelveHour(time):
 def isnear(time1, time2):
     """for 24hr format only
        check if times are within 2 hours range difference"""
-    
+
     time1 = [int(x) for x in time1.split(":")]
     time2 = [int(x) for x in time2.split(":")]
 
