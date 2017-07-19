@@ -191,8 +191,22 @@ def replyHandler(sender_id, query, arrivals, departures):
             send(data)
 
     else:
-        message = u"There are many flights with {}. Please give me the flight number or the time. I.e. 'Air KBZ around 6pm' {}".format(
+        message = u"There are many flights with {}. {}".format(
                    query.title(), emoji.grinning)
+        data = templates.message(sender_id, message)
+        send(data)
+
+        # show list of flight numbers of given airline
+        # add to sets to remove duplicate flight numbers
+        flightNumbers = set()
+        for each in searched_flights:
+            flightNumbers.add((each.getFlightNo(), each.getScheduled()))
+
+        message = u"Flight Numbers: "
+        for each in flightNumbers:
+            message += u"\n\u2022 {0:>7}, {1:>7}".format(
+                unicode(each[0]),
+                unicode(each[1]))
         data = templates.message(sender_id, message)
         send(data)
 
