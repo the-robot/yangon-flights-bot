@@ -162,7 +162,7 @@ def replyHandler(sender_id, query, arrivals, departures):
                 send(data)
 
         # same flight numbers exist in departure data
-        elif len(departures) > 1 and not arrivals and flight.sameFlightNumbers(departures):
+        elif len(departures) > 1 and not arrivals and flights.sameFlightNumbers(departures):
             message = u"There are {} flights.".format(len(departures))
             data = templates.message(sender_id, message)
             send(data)
