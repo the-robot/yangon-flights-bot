@@ -73,7 +73,7 @@ def incomingHandler(sender_id, message_text):
         # FORMAT: <query> around <time in 12hr> (i.e. 7pm)
         message_text = message_text.rsplit(" around ", 1)
 
-        # time not included search by flight no. or airline 
+        # time not included search by flight no. or airline
         if len(message_text) == 1:
             if message_text[0].upper() == "AIRLINES":
                 airlines = u"This is the list of airlines"
@@ -145,20 +145,50 @@ def replyHandler(sender_id, query, arrivals, departures):
         send(data)
 
     # if there are more than 1 matched flights and it is less than 11
-    # ask user to choose by flight number
-    # (Facebook quick replies maximum limit is 11)
     elif len(searched_flights) > 1 and len(searched_flights) <= 11:
-        options = []
-        for flight in searched_flights:
-            options.append({
-                "content_type": "text",
-                "title": flight.getFlightNo(),
-                "payload": flight.getFlightNo()
-                })
-        data = templates.options(sender_id,
-            u"Please select the flight number {}".format(emoji.grinning),
-            options)
-        send(data)
+        # same flight numbers exists in arrivals data
+        if len(arrivals) > 1 and not departures and flights.sameFlightNumbers(arrivals):
+            message = u"There are {} flights.".format(len(arrivals))
+            data = templates.message(sender_id, message)
+            send(data)
+
+            # loop and show all flights info
+            for each in searched_flights:
+                message = u"Flight {} operated by {} from {} will arrive at {}. It's {}.".format(
+                           each.getFlightNo(), each.getAirline().title(),
+                           each.getCity(), each.getScheduled(),
+                           each.getStatus().lower())
+                data = templates.message(sender_id, message)
+                send(data)
+
+        # same flight numbers exist in departure data
+        elif len(departures) > 1 and not arrivals and flight.sameFlightNumbers(departures):
+            message = u"There are {} flights.".format(len(departures))
+            data = templates.message(sender_id, message)
+            send(data)
+
+            # loop and show all flights info
+            for each in searched_flights:
+                message = u"Flight {} operated by {} to {} will take off at {}.".format(
+                           each.getFlightNo(), each.getAirline().title(),
+                           each.getCity(), each.getScheduled())
+                data = templates.message(sender_id, message)
+                send(data)
+
+        # ask user to choose by flight number
+        # (Facebook quick replies maximum limit is 11)
+        else:
+            options = []
+            for flight in searched_flights:
+                options.append({
+                    "content_type": "text",
+                    "title": flight.getFlightNo(),
+                    "payload": flight.getFlightNo()
+                    })
+            data = templates.options(sender_id,
+                u"Please select the flight number {}".format(emoji.grinning),
+                options)
+            send(data)
 
     else:
         message = u"There are many flights with {}. Please give me the flight number or the time. I.e. 'Air KBZ around 6pm' {}".format(
@@ -176,7 +206,7 @@ def send(data):
         "Content-Type": "application/json"
     }
 
-    r = requests.post("https://graph.facebook.com/v2.6/me/messages", 
+    r = requests.post("https://graph.facebook.com/v2.6/me/messages",
             params=params, headers=headers, data=data)
     if r.status_code != 200:
         log(r.status_code)

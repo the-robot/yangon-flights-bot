@@ -37,14 +37,22 @@ if __name__ == "__main__":
 
     if sys.argv[1] == 'arrival':
         main = Flights()
-        #flights = main.search('arrival', sys.argv[2])
+        flights = main.search('arrival', sys.argv[2])
         #flights = main.searchByTime("arrival", "Myanmar Airways International", "7pm")
     elif sys.argv[1] == 'depart':
         main = Flights()
-        #flights = main.search('departure', sys.argv[2])
+        flights = main.search('departure', sys.argv[2])
         #flights = main.searchByTime("departure", "Myanmar Airways International", "7pm")
     else:
         exit("./cli [arrival/depart] query")
+
+    print("There are " + str(len(flights)) + " flights.")
+
+    if len(flights) > 1:
+        if main.sameFlightNumbers(flights):
+            print("Those flights are the same")
+        else:
+            print("Those flights are not the same")
 
     """
     if flights != []:

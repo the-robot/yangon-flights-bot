@@ -9,7 +9,7 @@ class Flights(FlightWrapper):
 
     def __init__(self):
         # initialize variables
- 
+
         self.current_time = datetime.now()
         self.data = {}  # to store arrival/depart flights
 
@@ -106,5 +106,15 @@ class Flights(FlightWrapper):
         new_time = datetime.now()
         if self.compareTime(self.current_time, new_time)[0] > 5:
             self.current_time = new_time
+            return True
+        return False
+
+    def sameFlightNumbers(self, flights):
+        """check if all flights are the same"""
+        flightNumbers = []
+        for each in flights:
+            flightNumbers.append(each.getFlightNo())
+
+        if len(set(flightNumbers)) == 1:
             return True
         return False
